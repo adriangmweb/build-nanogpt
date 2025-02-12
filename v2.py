@@ -116,10 +116,12 @@ class Block(nn.Module):
         head_size = n_embed // num_heads
         self.sa = MultiHeadAttention(num_heads, head_size)
         self.ffwd = FeedForward(n_embed)
+        self.ln1 = nn.LayerNorm(n_embed)
+        self.ln2 = nn.LayerNorm(n_embed)
 
     def forward(self, x):
-        x = x + self.sa(x) # (B,T,C) # communication and residual connection
-        x = x + self.ffwd(x) # (B,T,C) # computation and residual connection
+        x = x + self.sa(self.ln1(x)) # (B,T,C) # communication and residual connection
+        x = x + self.ffwd(self.ln2(x)) # (B,T,C) # computation and residual connection
         return x
     
 # super simple bigram model
