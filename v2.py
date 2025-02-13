@@ -8,7 +8,7 @@ block_size = 256 # what is the maximum context length for predictions?
 max_iters = 5000
 eval_interval = 500
 learning_rate = 3e-4
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
+device = 'mps' if torch.backends.mps.is_available() else 'cuda' if torch.cuda.is_available() else 'cpu'
 eval_iters = 200
 n_embed = 384
 n_heads = 6
@@ -146,7 +146,7 @@ class BigramLanguageModel(nn.Module):
 
         # idx and targets are both (B,T) tensor of integers
         token_embeddings = self.token_embedding_table(idx) # (B,T,C)
-        pos_embeddings = self.position_embedding_table(torch.arange(T)) # (T,C)
+        pos_embeddings = self.position_embedding_table(torch.arange(T, device=device)) # (T,C)
         x = token_embeddings + pos_embeddings # (B,T,C)
         x = self.blocks(x) # (B,T,C)
         x = self.ln_f(x) # (B,T,C)
